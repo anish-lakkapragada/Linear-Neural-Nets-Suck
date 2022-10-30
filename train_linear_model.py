@@ -65,7 +65,7 @@ class LinRegRegressor(nn.Module):
     def get_intercept(self, X): 
         return torch.mean(LinRegRegressor.forward(self, X) - LinRegRegressor.get_weight(self) * X).item()
 # %%
-for NOISE_COEF in [0.05, 0.30, 0.05]: 
+for NOISE_COEF in [0.5]: 
     import matplotlib.pyplot as plt 
     import numpy as np 
     N = 1000 
@@ -123,13 +123,21 @@ for NOISE_COEF in [0.05, 0.30, 0.05]:
 
 # %% 
 
+import numpy as np 
+import matplotlib.pyplot as plt 
+
+NOISE=0.5
+
+meta_differences = np.load(f"differences/differences-noise={NOISE}.npy")
+mse_val = np.load(f"mse/val_mse-noise={NOISE}.npy")
 for i in range(10): 
     differences = np.mean(meta_differences[:, i, :],axis=0)
     plt.plot(differences, label=f"{i+1}th regressor")
 plt.legend()
 
 for i in range(10): 
-    print(np.mean(mse_val[:, i, -1]), np.std(mse_val[:, i, -1]))
+    print(np.std(mse_val[:, i, -1]))
+
 
 # # %%
 # """
@@ -201,3 +209,5 @@ for i in range(10):
 #     plt.show()
 # # %%
 # print(dubs)
+
+# %%
