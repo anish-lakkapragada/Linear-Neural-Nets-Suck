@@ -1,2 +1,1 @@
-# Proof that Linear Neural Networks Decrease Performance 
-
+# When More Parameters Reduce Training Performance: Linear Neural Networks
