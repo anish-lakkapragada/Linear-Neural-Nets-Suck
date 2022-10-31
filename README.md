@@ -1,2 +1,1 @@
-# sus-log-reg
-Exploration of an alternate objective function. 
+# When More Parameters Reduce Training Performance: Linear Neural Networks
