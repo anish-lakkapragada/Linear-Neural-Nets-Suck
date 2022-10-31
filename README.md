@@ -1,2 +1,2 @@
-# sus-log-reg
-Exploration of an alternate objective function. 
+# Proof that Linear Neural Networks Decrease Performance 
+
