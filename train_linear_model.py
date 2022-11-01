@@ -3,7 +3,7 @@ import torch
 from torch import nn as nn 
 from tqdm import tqdm 
 import numpy as np
-
+from utils import alternate_loss_function
 class LinReg(nn.Module):
     def __init__(self, inputSize, outputSize):
         super(LinReg, self).__init__()
