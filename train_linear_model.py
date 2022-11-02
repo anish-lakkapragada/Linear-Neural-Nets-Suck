@@ -68,7 +68,7 @@ class LinRegRegressor(nn.Module):
 from sklearn.linear_model import LinearRegression as SklearnLinearRegression
 import matplotlib.pyplot as plt 
 import numpy as np 
-for NOISE_COEF in [0.15]: 
+for NOISE_COEF in [0.3, 0.5]: 
     
     N = 1000 
     N_validation = 200
