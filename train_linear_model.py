@@ -3,7 +3,7 @@ import torch
 from torch import nn as nn 
 from tqdm import tqdm 
 import numpy as np
-from utils import alternate_loss_function
+
 class LinReg(nn.Module):
     def __init__(self, inputSize, outputSize):
         super(LinReg, self).__init__()
@@ -65,9 +65,11 @@ class LinRegRegressor(nn.Module):
     def get_intercept(self, X): 
         return torch.mean(LinRegRegressor.forward(self, X) - LinRegRegressor.get_weight(self) * X).item()
 # %%
-for NOISE_COEF in [0.5]: 
-    import matplotlib.pyplot as plt 
-    import numpy as np 
+from sklearn.linear_model import LinearRegression as SklearnLinearRegression
+import matplotlib.pyplot as plt 
+import numpy as np 
+for NOISE_COEF in [0.15]: 
+    
     N = 1000 
     N_validation = 200
     N_models = 10
@@ -77,6 +79,7 @@ for NOISE_COEF in [0.5]:
     mse_train = np.zeros((TRIALS, N_models, EPOCHS))
     mse_val = np.zeros((TRIALS, N_models, EPOCHS))
     meta_differences = np.zeros((TRIALS, N_models, EPOCHS))
+    grad_magnitudes = np.zeros((TRIALS, N_models, EPOCHS))
 
     for trial in range(TRIALS): 
         
@@ -92,7 +95,6 @@ for NOISE_COEF in [0.5]:
         y_val = A * X_val + B 
         y_val += noise * NOISE_COEF * torch.mean(y_val)
 
-        from sklearn.linear_model import LinearRegression as SklearnLinearRegression
         sklearn_linreg = SklearnLinearRegression() 
         sklearn_linreg.fit(X.reshape(-1, 1), y)
         line_of_best_fit_weight = sklearn_linreg.coef_[0]
@@ -104,11 +106,16 @@ for NOISE_COEF in [0.5]:
             mse = nn.MSELoss()
             optimizer = torch.optim.SGD(lin_reg.parameters(), lr=0.001)
 
+            
             for epoch in range(EPOCHS): 
                 optimizer.zero_grad()
                 train_loss = mse(lin_reg(X.reshape(-1, 1)), y.reshape(-1, 1)).sum()
                 mse_train[trial][i][epoch] = train_loss.detach().numpy()
                 train_loss.backward()
+                avg_magnitude = []
+                for parameter in lin_reg.parameters(): 
+                    avg_magnitude += [torch.norm(parameter.grad)]
+                grad_magnitudes[trial][i][epoch] = torch.mean(torch.tensor(avg_magnitude))
                 optimizer.step()
                 differences[i][epoch] = abs(lin_reg.get_weight() - line_of_best_fit_weight) + abs(lin_reg.get_intercept(X.reshape(-1, 1)) - line_of_best_fit_intercept)
                 
@@ -116,10 +123,10 @@ for NOISE_COEF in [0.5]:
                     mse_val[trial][i][epoch] = mse(lin_reg(X_val.reshape(-1, 1)), y_val.reshape(-1, 1)).sum().detach().numpy()
             meta_differences[trial][i] += differences[i]
 
-    np.save(f"differences/differences-noise={NOISE_COEF}", meta_differences)
-    np.save(f"mse/train_mse-noise={NOISE_COEF}", mse_train)
-    np.save(f"mse/val_mse-noise={NOISE_COEF}", mse_val)
-
+    # np.save(f"differences/differences-noise={NOISE_COEF}", meta_differences)
+    # np.save(f"mse/train_mse-noise={NOISE_COEF}", mse_train)
+    # np.save(f"mse/val_mse-noise={NOISE_COEF}", mse_val)
+    np.save(f"grads/magnitudes_noise={NOISE_COEF}", grad_magnitudes)
 
 # %% 
 
