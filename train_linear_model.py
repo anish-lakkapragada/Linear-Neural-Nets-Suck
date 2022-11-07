@@ -75,6 +75,7 @@ for NOISE_COEF in [0.3, 0.5]:
     N_models = 10
     EPOCHS = 10000
     TRIALS = 100
+    LR = 0.00005 # 0.001
 
     mse_train = np.zeros((TRIALS, N_models, EPOCHS))
     mse_val = np.zeros((TRIALS, N_models, EPOCHS))
@@ -104,7 +105,7 @@ for NOISE_COEF in [0.3, 0.5]:
         for i in range(N_models): 
             lin_reg = LinRegRegressor(i + 1)
             mse = nn.MSELoss()
-            optimizer = torch.optim.SGD(lin_reg.parameters(), lr=0.001)
+            optimizer = torch.optim.SGD(lin_reg.parameters(), lr=LR)
 
             
             for epoch in range(EPOCHS): 
@@ -123,27 +124,36 @@ for NOISE_COEF in [0.3, 0.5]:
                     mse_val[trial][i][epoch] = mse(lin_reg(X_val.reshape(-1, 1)), y_val.reshape(-1, 1)).sum().detach().numpy()
             meta_differences[trial][i] += differences[i]
 
-    # np.save(f"differences/differences-noise={NOISE_COEF}", meta_differences)
-    # np.save(f"mse/train_mse-noise={NOISE_COEF}", mse_train)
-    # np.save(f"mse/val_mse-noise={NOISE_COEF}", mse_val)
-    np.save(f"grads/magnitudes_noise={NOISE_COEF}", grad_magnitudes)
+    np.save(f"differences/differences-noise={NOISE_COEF}-lr={LR}", meta_differences)
+    np.save(f"mse/train_mse-noise={NOISE_COEF}-lr={LR}", mse_train)
+    np.save(f"mse/val_mse-noise={NOISE_COEF}-lr={LR}", mse_val)
+    # np.save(f"grads/magnitudes_noise={NOISE_COEF}", grad_magnitudes)
 
 # %% 
 
-import numpy as np 
-import matplotlib.pyplot as plt 
+# import numpy as np 
+# import matplotlib.pyplot as plt 
 
-NOISE=0.5
+# NOISE=0.15
 
-meta_differences = np.load(f"differences/differences-noise={NOISE}.npy")
-mse_val = np.load(f"mse/val_mse-noise={NOISE}.npy")
-for i in range(10): 
-    differences = np.mean(meta_differences[:, i, :],axis=0)
-    plt.plot(differences, label=f"{i+1}th regressor")
-plt.legend()
+# """meta_differences = np.load(f"differences/differences-noise={NOISE}.npy")
+# mse_val = np.load(f"mse/val_mse-noise={NOISE}.npy")
+# for i in range(10): 
+#     differences = np.mean(meta_differences[:, i, :],axis=0)
+#     plt.plot(differences, label=f"{i+1}th regressor")
+# plt.legend()
 
-for i in range(10): 
-    print(np.std(mse_val[:, i, -1]))
+# for i in range(10): 
+#     print(np.std(mse_val[:, i, -1]))"""
+
+# grad_magnitudes = np.load(f"grads/magnitudes_noise={NOISE}.npy")
+# for i in range(10): 
+#     plt.plot(np.mean(grad_magnitudes[:, i, :], axis=0)[5000:], label=f"LNN-{i}")
+# plt.legend()
+# plt.xlabel("Training Iterations")
+# plt.ylabel("Average Gradient Magnitude")
+# plt.title("Gradient Magnitudes over time for All Models")
+# plt.show()
 
 
 # # %%
